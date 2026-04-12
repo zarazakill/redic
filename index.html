@@ -4,7 +4,6 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>MTProxy — подключение</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Unbounded:wght@400;700&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#080c10;--surface:#0d1318;--border:#1a2330;--border2:#243040;--accent:#00e5ff;--secure:#00e676;--classic:#448aff;--tls:#e040fb;--text:#e8f4f8;--muted:#5a7a8a;--muted2:#3a5060}
@@ -48,6 +47,9 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 .noref-title{font-family:'Unbounded',sans-serif;font-size:.9rem;color:#ff5252;margin-bottom:.5rem}
 .noref-text{font-size:.75rem;color:var(--muted);line-height:1.7}
 .warn-block{background:rgba(255,171,0,.06);border:1px solid rgba(255,171,0,.2);border-radius:12px;padding:1rem 1.25rem;font-size:.7rem;color:#ffca28;line-height:1.6}
+.loading{text-align:center;padding:2rem;color:var(--muted)}
+.error-card{background:var(--surface);border:1px solid rgba(255,82,82,.25);border-radius:16px;padding:2rem 1.75rem;text-align:center;animation:fadeUp .5s ease both}
+.error-title{font-family:'Unbounded',sans-serif;font-size:.9rem;color:#ff5252;margin-bottom:.5rem}
 @keyframes fadeDown{from{opacity:0;transform:translateY(-16px)}to{opacity:1;transform:translateY(0)}}
 @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 </style>
@@ -67,86 +69,177 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 </div>
 
 <script>
-// ── Конфиг — меняй только здесь ──────────────────────────────────────────
-const HOST       = 'wwcat.duckdns.org';
-const PORT       = '8043';
-const TLS_DOMAIN = 'cloudflare.com';
-const SECRET     = '653cab966271b2e8b4f698852bbcf86f';
-const ADMIN_URL  = 'http://localhost:5000'; // твоя локальная панель
-// ─────────────────────────────────────────────────────────────────────────
+// ==================== КОНФИГУРАЦИЯ ====================
+// Все секреты и конфиги на сервере, здесь только URL API
+// Админ-панель на том же домене, что и сервер (CORS будет работать)
+const ADMIN_API_URL = 'https://wwcat.duckdns.org:5000';
 
 const ref = new URLSearchParams(location.search).get('ref') || '';
 const app = document.getElementById('app');
 
-function hexEncode(s){ return Array.from(s).map(c=>c.charCodeAt(0).toString(16).padStart(2,'0')).join(''); }
-function buildLinks(){
-  const b=SECRET.toLowerCase(), h=hexEncode(TLS_DOMAIN);
-  return{
-    secure:  `https://t.me/proxy?server=${HOST}&port=${PORT}&secret=dd${b}`,
-    classic: `https://t.me/proxy?server=${HOST}&port=${PORT}&secret=${b}`,
-    tls:     `https://t.me/proxy?server=${HOST}&port=${PORT}&secret=ee${b}${h}`,
-  };
+// Кэш проверенных пользователей (5 минут)
+const userCache = new Map();
+const CACHE_TTL = 5 * 60 * 1000;
+
+// ==================== ФУНКЦИИ ====================
+
+// Логирование событий
+async function logEvent(action) {
+    if (!ref) return;
+    const body = JSON.stringify({ ref, action, ts: new Date().toISOString() });
+    try { 
+        await fetch(`${ADMIN_API_URL}/log`, { 
+            method: 'POST', 
+            body: body,
+            mode: 'no-cors',
+            keepalive: true 
+        });
+    } catch(e) {
+        console.error('Log error:', e);
+    }
 }
 
-// Тихий лог в локальную панель (no-cors — ответ не нужен)
-function logEvent(action){
-  if(!ref) return;
-  const body = JSON.stringify({ ref, action, ts: new Date().toISOString() });
-  try { navigator.sendBeacon(ADMIN_URL+'/log', new Blob([body],{type:'application/json'})); } catch(_){}
-  try { fetch(ADMIN_URL+'/log',{method:'POST',body,mode:'no-cors',keepalive:true}).catch(()=>{}); } catch(_){}
+// Проверка существования пользователя
+async function checkUserExists(userRef) {
+    // Проверяем кэш
+    const cached = userCache.get(userRef);
+    if (cached && (Date.now() - cached.timestamp) < CACHE_TTL) {
+        return cached.exists;
+    }
+    
+    try {
+        const resp = await fetch(`${ADMIN_API_URL}/api/check_user?user_id=${encodeURIComponent(userRef)}`);
+        if (!resp.ok) return false;
+        const data = await resp.json();
+        const exists = data.exists === true;
+        userCache.set(userRef, { exists, timestamp: Date.now() });
+        return exists;
+    } catch(e) {
+        console.error('Check error:', e);
+        return false;
+    }
 }
 
-function tgSvg(){ return `<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248-1.97 9.289c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.833.932z"/></svg>`; }
-
-if(!ref){
-  app.innerHTML=`<div class="noref-card"><div class="noref-title">🔒 Ссылка недействительна</div><div class="noref-text">Доступ только по персональной ссылке.<br>Обратись к администратору.</div></div>`;
-} else {
-  logEvent('open');
-  app.innerHTML=`
-    <div class="greet-card">
-      <div class="greet-name">Привет, ${ref}!</div>
-      <div class="greet-sub">Нажми кнопку — получишь готовые ссылки для подключения к прокси.</div>
-    </div>
-    <div class="gen-wrap">
-      <button class="gen-btn" onclick="showLinks()">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-        Получить ссылки
-      </button>
-    </div>
-    <div id="results" style="display:none;flex-direction:column;gap:.75rem"></div>`;
+// Получение прокси-ссылок с сервера (секреты не видны в клиенте!)
+async function getProxyLinks() {
+    try {
+        const resp = await fetch(`${ADMIN_API_URL}/api/proxy_links`);
+        const data = await resp.json();
+        return data.links;
+    } catch(e) {
+        console.error('Failed to get proxy links:', e);
+        // Fallback на случай ошибки сервера
+        return null;
+    }
 }
 
-function showLinks(){
-  logEvent('links_shown');
-  const L=buildLinks();
-  const blocks=[
-    {cls:'secure', badge:'🔒 Secure',  rec:'рекомендуется',       id:'u-s',url:L.secure},
-    {cls:'classic',badge:'📱 Classic',rec:'Android старые версии',id:'u-c',url:L.classic},
-    {cls:'tls',    badge:'🌐 TLS',    rec:'маскировка трафика',   id:'u-t',url:L.tls},
-  ];
-  let html='';
-  for(const b of blocks){
-    html+=`<div class="link-block ${b.cls}" style="animation:fadeUp .35s ease both">
-      <div class="block-head"><span class="block-badge">${b.badge}</span><span class="block-rec">${b.rec}</span></div>
-      <div class="link-url" id="${b.id}">${b.url}</div>
-      <div class="btn-row">
-        <a class="btn-tg" href="${b.url}">${tgSvg()} Открыть в Telegram</a>
-        <button class="btn-copy" onclick="cp('${b.id}',this)">Копировать</button>
-      </div>
-    </div>`;
-  }
-  html+=`<div class="warn-block">⚠️ Ссылки выданы лично тебе. Не передавай их другим — доступ будет отозван.</div>`;
-  const r=document.getElementById('results');
-  r.style.display='flex'; r.innerHTML=html;
-  document.querySelector('.gen-btn').style.display='none';
+// Основная логика
+async function init() {
+    if (!ref) {
+        app.innerHTML = `
+            <div class="noref-card">
+                <div class="noref-title">🔒 Ссылка недействительна</div>
+                <div class="noref-text">Доступ только по персональной ссылке.<br>Обратись к администратору.</div>
+            </div>`;
+        return;
+    }
+    
+    app.innerHTML = `<div class="loading">🔍 Проверка доступа...</div>`;
+    
+    const userExists = await checkUserExists(ref);
+    
+    if (!userExists) {
+        app.innerHTML = `
+            <div class="error-card">
+                <div class="error-title">⛔ Доступ запрещён</div>
+                <div class="noref-text">Пользователь "${escapeHtml(ref)}" не найден в системе.<br>
+                Пожалуйста, обратитесь к администратору для получения доступа.</div>
+            </div>`;
+        return;
+    }
+    
+    await logEvent('open');
+    
+    app.innerHTML = `
+        <div class="greet-card">
+            <div class="greet-name">Привет, ${escapeHtml(ref)}!</div>
+            <div class="greet-sub">Нажми кнопку — получишь готовые ссылки для подключения к прокси.</div>
+        </div>
+        <div class="gen-wrap">
+            <button class="gen-btn" onclick="showLinks()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                Получить ссылки
+            </button>
+        </div>
+        <div id="results" style="display:none;flex-direction:column;gap:.75rem"></div>`;
 }
 
-function cp(id,btn){
-  navigator.clipboard.writeText(document.getElementById(id).textContent.trim()).then(()=>{
-    const o=btn.textContent; btn.textContent='✓ Скопировано'; btn.classList.add('copied');
-    setTimeout(()=>{btn.textContent=o;btn.classList.remove('copied');},2000);
-  });
+async function showLinks() {
+    await logEvent('links_shown');
+    
+    const L = await getProxyLinks();
+    
+    if (!L) {
+        alert('Ошибка загрузки ссылок. Попробуйте позже.');
+        return;
+    }
+    
+    const blocks = [
+        {cls:'secure', badge:'🔒 Secure', rec:'рекомендуется', url: L.secure},
+        {cls:'classic', badge:'📱 Classic', rec:'Android старые версии', url: L.classic},
+        {cls:'tls', badge:'🌐 TLS', rec:'маскировка трафика', url: L.tls},
+    ];
+    
+    let html = '';
+    for(const b of blocks) {
+        html += `<div class="link-block ${b.cls}" style="animation:fadeUp .35s ease both">
+            <div class="block-head">
+                <span class="block-badge">${b.badge}</span>
+                <span class="block-rec">${b.rec}</span>
+            </div>
+            <div class="link-url">${b.url}</div>
+            <div class="btn-row">
+                <a class="btn-tg" href="${b.url}">${tgSvg()} Открыть в Telegram</a>
+                <button class="btn-copy" onclick="cp('${b.url}',this)">Копировать</button>
+            </div>
+        </div>`;
+    }
+    html += `<div class="warn-block">⚠️ Ссылки выданы лично тебе. Не передавай их другим — доступ будет отозван.</div>`;
+    
+    const r = document.getElementById('results');
+    r.style.display = 'flex';
+    r.innerHTML = html;
+    document.querySelector('.gen-btn').style.display = 'none';
 }
+
+function tgSvg() { 
+    return `<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248-1.97 9.289c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.833.932z"/></svg>`; 
+}
+
+function cp(text, btn) {
+    navigator.clipboard.writeText(text).then(() => {
+        const old = btn.textContent;
+        btn.textContent = '✓';
+        btn.classList.add('copied');
+        setTimeout(() => {
+            btn.textContent = old;
+            btn.classList.remove('copied');
+        }, 1500);
+    });
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/[&<>]/g, function(m) {
+        if (m === '&') return '&amp;';
+        if (m === '<') return '&lt;';
+        if (m === '>') return '&gt;';
+        return m;
+    });
+}
+
+// Запуск
+init();
 </script>
 </body>
 </html>
