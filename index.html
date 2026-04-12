@@ -1,454 +1,152 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Подключение к прокси | Redic</title>
-<meta name="description" content="Безопасный MTProto прокси для Telegram">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MTProxy — подключение</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;700;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Unbounded:wght@400;700&display=swap" rel="stylesheet">
 <style>
-* { margin:0; padding:0; box-sizing:border-box; }
-
-:root {
-  --bg: #06091a;
-  --card: #0c1128;
-  --border: #1a2544;
-  --accent: #4f8ef7;
-  --glow: rgba(79,142,247,0.2);
-  --text: #e8edf7;
-  --text2: #7a8fbb;
-  --green: #0fd980;
-  --red: #f04060;
-}
-
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: 'Inter', sans-serif;
-  min-height: 100vh;
-  overflow-x: hidden;
-}
-
-/* Animated background */
-body::before {
-  content:'';
-  position:fixed; inset:0;
-  background:
-    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(79,142,247,0.12) 0%, transparent 60%),
-    radial-gradient(ellipse 40% 30% at 80% 80%, rgba(107,72,255,0.08) 0%, transparent 50%);
-  pointer-events:none; z-index:0;
-}
-
-.container { max-width:520px; margin:0 auto; padding:0 20px; position:relative; z-index:1; }
-
-/* HEADER */
-header {
-  text-align:center;
-  padding:60px 20px 40px;
-}
-.logo-wrap {
-  display:inline-flex; align-items:center; gap:10px;
-  background: rgba(79,142,247,0.08);
-  border:1px solid rgba(79,142,247,0.2);
-  border-radius:50px; padding:8px 18px;
-  margin-bottom:32px;
-}
-.logo-dot { width:8px; height:8px; background:var(--green); border-radius:50%; box-shadow:0 0 8px var(--green); animation:blink 2s infinite; }
-@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
-.logo-text { font-size:13px; font-weight:600; color:var(--accent); letter-spacing:0.5px; }
-
-h1 {
-  font-family:'Unbounded',sans-serif;
-  font-size:clamp(28px, 6vw, 42px);
-  font-weight:900;
-  line-height:1.1;
-  margin-bottom:16px;
-  background: linear-gradient(135deg, #fff 0%, var(--accent) 100%);
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-}
-.subtitle { font-size:15px; color:var(--text2); line-height:1.6; }
-
-/* CARD */
-.card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius:20px;
-  padding: 28px;
-  margin: 24px 0;
-  position:relative; overflow:hidden;
-}
-.card::before {
-  content:''; position:absolute; top:0; left:0; right:0; height:1px;
-  background: linear-gradient(90deg, transparent, rgba(79,142,247,0.4), transparent);
-}
-
-/* STATE CARDS */
-.state { display:none; }
-.state.active { display:block; }
-
-/* LOADING */
-.loading-wrap {
-  text-align:center; padding:40px 0;
-}
-.loader {
-  width:56px; height:56px;
-  border: 3px solid rgba(79,142,247,0.15);
-  border-top-color: var(--accent);
-  border-radius:50%;
-  animation: spin 0.9s linear infinite;
-  margin:0 auto 20px;
-}
-@keyframes spin { to{transform:rotate(360deg);} }
-.loading-title { font-size:18px; font-weight:700; margin-bottom:8px; }
-.loading-sub { font-size:14px; color:var(--text2); }
-
-/* SUCCESS */
-.success-icon {
-  width:64px; height:64px; border-radius:20px;
-  background:linear-gradient(135deg, rgba(15,217,128,0.15), rgba(79,142,247,0.1));
-  border:1px solid rgba(15,217,128,0.25);
-  display:flex; align-items:center; justify-content:center;
-  font-size:28px; margin:0 auto 20px;
-}
-.success-title { font-size:22px; font-weight:800; text-align:center; margin-bottom:8px; }
-.success-sub { font-size:14px; color:var(--text2); text-align:center; margin-bottom:28px; }
-
-/* PROXY INFO */
-.proxy-info {
-  background:rgba(79,142,247,0.06);
-  border:1px solid rgba(79,142,247,0.15);
-  border-radius:12px; padding:16px;
-  margin-bottom:20px;
-}
-.info-row {
-  display:flex; align-items:center; justify-content:space-between;
-  padding:6px 0;
-}
-.info-row + .info-row { border-top:1px solid rgba(255,255,255,0.05); }
-.info-label { font-size:12px; color:var(--text2); }
-.info-value { font-family:monospace; font-size:13px; font-weight:600; color:var(--text); }
-
-/* BUTTONS */
-.btn-big {
-  display:flex; align-items:center; justify-content:center; gap:10px;
-  width:100%; padding:16px; border-radius:12px;
-  font-size:15px; font-weight:700; cursor:pointer;
-  border:none; font-family:'Inter',sans-serif;
-  transition:all 0.2s; text-decoration:none;
-}
-.btn-primary-big {
-  background:linear-gradient(135deg, var(--accent), #2563eb);
-  color:#fff;
-  box-shadow: 0 8px 30px rgba(79,142,247,0.35);
-}
-.btn-primary-big:hover { transform:translateY(-2px); box-shadow:0 12px 40px rgba(79,142,247,0.45); }
-.btn-secondary-big {
-  background:transparent; color:var(--text);
-  border:1px solid var(--border);
-  margin-top:10px;
-}
-.btn-secondary-big:hover { border-color:var(--accent); color:var(--accent); }
-
-/* ERROR */
-.error-icon { font-size:48px; text-align:center; margin-bottom:16px; }
-.error-title { font-size:20px; font-weight:800; text-align:center; margin-bottom:8px; }
-.error-sub { font-size:14px; color:var(--text2); text-align:center; }
-
-/* STEPS */
-.steps { margin:20px 0; }
-.step {
-  display:flex; align-items:flex-start; gap:14px;
-  padding:14px 0;
-  border-bottom:1px solid rgba(255,255,255,0.05);
-}
-.step:last-child { border-bottom:none; }
-.step-num {
-  min-width:28px; height:28px; border-radius:8px;
-  background:rgba(79,142,247,0.15); border:1px solid rgba(79,142,247,0.25);
-  display:flex; align-items:center; justify-content:center;
-  font-size:13px; font-weight:800; color:var(--accent);
-  font-family:'Unbounded',sans-serif;
-}
-.step-text { font-size:14px; line-height:1.5; }
-.step-text b { color:var(--accent); }
-
-/* LINK DISPLAY */
-.link-display {
-  background:rgba(0,0,0,0.3); border:1px solid var(--border);
-  border-radius:10px; padding:12px 14px;
-  font-family:monospace; font-size:11px; color:var(--accent);
-  word-break:break-all; line-height:1.6; margin:12px 0;
-  position:relative;
-}
-.copy-overlay {
-  position:absolute; top:8px; right:8px;
-  background:var(--accent); color:#fff; border:none;
-  padding:3px 9px; border-radius:6px; font-size:11px;
-  font-weight:700; cursor:pointer; transition:all 0.2s;
-}
-.copy-overlay:hover { background:#2563eb; }
-
-/* FOOTER */
-footer {
-  text-align:center; padding:40px 20px;
-  font-size:12px; color:var(--text2);
-  border-top:1px solid var(--border);
-  margin-top:20px;
-}
-.footer-logo { font-family:'Unbounded',sans-serif; font-size:14px; font-weight:900; color:var(--accent); margin-bottom:8px; }
-
-/* MANUAL SECTION */
-.manual-toggle {
-  text-align:center; color:var(--text2); font-size:13px;
-  cursor:pointer; padding:10px; text-decoration:underline;
-  margin-top:8px; display:block;
-}
-.manual-toggle:hover { color:var(--accent); }
-#manual-section { display:none; margin-top:12px; }
-
-/* BADGE */
-.badge-new {
-  display:inline-block;
-  background:rgba(15,217,128,0.12); color:var(--green);
-  border:1px solid rgba(15,217,128,0.25);
-  border-radius:6px; padding:2px 8px;
-  font-size:11px; font-weight:700;
-  margin-left:8px; vertical-align:middle;
-}
+:root{--bg:#080c10;--surface:#0d1318;--border:#1a2330;--border2:#243040;--accent:#00e5ff;--secure:#00e676;--classic:#448aff;--tls:#e040fb;--text:#e8f4f8;--muted:#5a7a8a;--muted2:#3a5060}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:1.5rem 1rem;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,229,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,255,.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
+.wrap{position:relative;z-index:1;width:100%;max-width:500px}
+.header{text-align:center;margin-bottom:2.5rem;animation:fadeDown .6s ease both}
+.logo{font-family:'Unbounded',sans-serif;font-size:1.35rem;font-weight:700;color:var(--accent);display:flex;align-items:center;justify-content:center;gap:.6rem;margin-bottom:.5rem}
+.logo-icon{width:32px;height:32px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center}
+.sub{font-size:.72rem;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+.greet-card{background:var(--surface);border:1px solid var(--border2);border-radius:16px;padding:1.5rem 1.75rem;margin-bottom:1.25rem;animation:fadeUp .5s .05s ease both}
+.greet-name{font-family:'Unbounded',sans-serif;font-size:1.1rem;font-weight:700;color:var(--accent);margin-bottom:.3rem}
+.greet-sub{font-size:.72rem;color:var(--muted);line-height:1.6}
+.gen-wrap{animation:fadeUp .5s .1s ease both;margin-bottom:1.25rem}
+.gen-btn{width:100%;background:var(--accent);color:#080c10;border:none;border-radius:12px;padding:1rem;font-family:'Unbounded',sans-serif;font-size:.85rem;font-weight:700;cursor:pointer;letter-spacing:.04em;transition:.15s;display:flex;align-items:center;justify-content:center;gap:.6rem}
+.gen-btn:hover{background:#33eaff}
+.gen-btn:active{transform:scale(.98)}
+#results{display:none;flex-direction:column;gap:.75rem}
+.link-block{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.25rem 1.5rem;position:relative;overflow:hidden}
+.link-block::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:3px 0 0 3px}
+.link-block.secure{border-color:rgba(0,230,118,.2)}.link-block.secure::before{background:var(--secure)}
+.link-block.classic{border-color:rgba(68,138,255,.2)}.link-block.classic::before{background:var(--classic)}
+.link-block.tls{border-color:rgba(224,64,251,.2)}.link-block.tls::before{background:var(--tls)}
+.block-head{display:flex;align-items:center;gap:.6rem;margin-bottom:.75rem}
+.block-badge{font-size:.6rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:.2rem .55rem;border-radius:4px}
+.secure .block-badge{background:rgba(0,230,118,.12);color:var(--secure)}
+.classic .block-badge{background:rgba(68,138,255,.12);color:var(--classic)}
+.tls .block-badge{background:rgba(224,64,251,.12);color:var(--tls)}
+.block-rec{font-size:.6rem;color:var(--muted);margin-left:auto}
+.link-url{font-size:.68rem;color:var(--muted);word-break:break-all;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:.6rem .8rem;margin-bottom:.9rem;line-height:1.5}
+.btn-row{display:flex;gap:.5rem}
+.btn-tg{flex:1;display:flex;align-items:center;justify-content:center;gap:.4rem;padding:.65rem;border-radius:9px;border:none;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:600;text-decoration:none;transition:.15s}
+.secure .btn-tg{background:rgba(0,230,118,.15);color:var(--secure)}
+.classic .btn-tg{background:rgba(68,138,255,.15);color:var(--classic)}
+.tls .btn-tg{background:rgba(224,64,251,.15);color:var(--tls)}
+.btn-copy{background:var(--border);color:var(--muted);border:none;border-radius:9px;padding:.65rem .9rem;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:.7rem;transition:.15s}
+.btn-copy:hover{background:var(--border2);color:var(--text)}
+.btn-copy.copied{background:rgba(0,230,118,.15);color:var(--secure)}
+.noref-card{background:var(--surface);border:1px solid rgba(255,82,82,.25);border-radius:16px;padding:2rem 1.75rem;text-align:center;animation:fadeUp .5s ease both}
+.noref-title{font-family:'Unbounded',sans-serif;font-size:.9rem;color:#ff5252;margin-bottom:.5rem}
+.noref-text{font-size:.75rem;color:var(--muted);line-height:1.7}
+.warn-block{background:rgba(255,171,0,.06);border:1px solid rgba(255,171,0,.2);border-radius:12px;padding:1rem 1.25rem;font-size:.7rem;color:#ffca28;line-height:1.6}
+@keyframes fadeDown{from{opacity:0;transform:translateY(-16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 </style>
 </head>
 <body>
-
-<div class="container">
-  <header>
-    <div class="logo-wrap">
-      <div class="logo-dot"></div>
-      <span class="logo-text">REDIC PROXY</span>
+<div class="wrap">
+  <div class="header">
+    <div class="logo">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#080c10" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      </div>
+      MTProxy
     </div>
-    <h1>MTProto<br>Прокси</h1>
-    <p class="subtitle">Быстрое и безопасное подключение<br>Telegram через MTProto прокси</p>
-  </header>
-
-  <!-- LOADING STATE -->
-  <div class="card state active" id="state-loading">
-    <div class="loading-wrap">
-      <div class="loader"></div>
-      <div class="loading-title">Получаем настройки...</div>
-      <div class="loading-sub">Проверяем вашу ссылку</div>
-    </div>
+    <div class="sub">Персональный доступ</div>
   </div>
-
-  <!-- SUCCESS STATE -->
-  <div class="card state" id="state-success">
-    <div class="success-icon">🛡</div>
-    <div class="success-title">Прокси готов!</div>
-    <div class="success-sub">Нажмите кнопку ниже для подключения через Telegram</div>
-
-    <div class="proxy-info">
-      <div class="info-row">
-        <span class="info-label">Сервер</span>
-        <span class="info-value" id="info-server">—</span>
-      </div>
-      <div class="info-row">
-        <span class="info-label">Порт</span>
-        <span class="info-value" id="info-port">—</span>
-      </div>
-      <div class="info-row">
-        <span class="info-label">Тип</span>
-        <span class="info-value">MTProto <span class="badge-new">FakeTLS</span></span>
-      </div>
-    </div>
-
-    <a id="tg-connect-btn" href="#" class="btn-big btn-primary-big" onclick="trackClick()">
-      <span>✈</span> Подключить Telegram
-    </a>
-    <a id="tme-connect-btn" href="#" class="btn-big btn-secondary-big" style="margin-top:10px">
-      🔗 Открыть через браузер
-    </a>
-
-    <span class="manual-toggle" onclick="toggleManual()">▼ Настроить вручную</span>
-    <div id="manual-section">
-      <div class="steps">
-        <div class="step">
-          <div class="step-num">1</div>
-          <div class="step-text">Откройте <b>Telegram</b> → Настройки → Конфиденциальность и безопасность</div>
-        </div>
-        <div class="step">
-          <div class="step-num">2</div>
-          <div class="step-text">Прокрутите вниз → <b>Тип подключения</b> → Использовать прокси</div>
-        </div>
-        <div class="step">
-          <div class="step-num">3</div>
-          <div class="step-text">Нажмите <b>Добавить прокси</b> → выберите MTProto</div>
-        </div>
-        <div class="step">
-          <div class="step-num">4</div>
-          <div class="step-text">Введите: сервер <b id="manual-server">—</b>, порт <b id="manual-port">—</b>, секрет:</div>
-        </div>
-      </div>
-      <div class="link-display" id="secret-display">
-        —
-        <button class="copy-overlay" onclick="copySecret()">COPY</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ERROR STATE -->
-  <div class="card state" id="state-error">
-    <div class="error-icon">⚠️</div>
-    <div class="error-title">Ссылка недействительна</div>
-    <div class="error-sub" id="error-msg">Проверьте ссылку и попробуйте снова</div>
-    <div style="margin-top:20px">
-      <a href="." class="btn-big btn-secondary-big">↩ На главную</a>
-    </div>
-  </div>
-
-  <!-- NO REF STATE (direct visit) -->
-  <div class="card state" id="state-info">
-    <div style="text-align:center;margin-bottom:24px">
-      <div style="font-size:40px;margin-bottom:12px">🛡</div>
-      <div style="font-size:18px;font-weight:800;margin-bottom:8px">MTProto Прокси</div>
-      <div style="font-size:14px;color:var(--text2)">Для подключения используйте персональную ссылку от администратора</div>
-    </div>
-    <div class="steps">
-      <div class="step">
-        <div class="step-num">1</div>
-        <div class="step-text">Получите персональную ссылку от администратора</div>
-      </div>
-      <div class="step">
-        <div class="step-num">2</div>
-        <div class="step-text">Перейдите по ссылке на этой странице</div>
-      </div>
-      <div class="step">
-        <div class="step-num">3</div>
-        <div class="step-text">Нажмите <b>Подключить Telegram</b> — и готово!</div>
-      </div>
-    </div>
-  </div>
-
-  <footer>
-    <div class="footer-logo">REDIC</div>
-    <div>Безопасное подключение · MTProto Protocol · Telegram Proxy</div>
-  </footer>
+  <div id="app"></div>
 </div>
 
 <script>
-// ── Config ────────────────────────────────────────────────────────────────────
-// ЗАМЕНИТЕ на ваш реальный API сервер:
-const API_BASE = 'https://wwcat.duckdns.org:5000';
+// ── Конфиг — меняй только здесь ──────────────────────────────────────────
+const HOST       = 'wwcat.duckdns.org';
+const PORT       = '8043';
+const TLS_DOMAIN = 'cloudflare.com';
+const SECRET     = '653cab966271b2e8b4f698852bbcf86f';
+const ADMIN_URL  = 'http://localhost:5000'; // твоя локальная панель
+// ─────────────────────────────────────────────────────────────────────────
 
-// ── State ──────────────────────────────────────────────────────────────────────
-function showState(name) {
-  document.querySelectorAll('.state').forEach(s => s.classList.remove('active'));
-  const el = document.getElementById('state-' + name);
-  if (el) el.classList.add('active');
-}
+const ref = new URLSearchParams(location.search).get('ref') || '';
+const app = document.getElementById('app');
 
-// ── URL Params ────────────────────────────────────────────────────────────────
-function getParams() {
-  const p = new URLSearchParams(window.location.search);
-  return {
-    ref: p.get('ref'),
-    from: p.get('from'),
-    // Direct params (fallback)
-    server: p.get('server'),
-    port: p.get('port'),
-    secret: p.get('secret'),
+function hexEncode(s){ return Array.from(s).map(c=>c.charCodeAt(0).toString(16).padStart(2,'0')).join(''); }
+function buildLinks(){
+  const b=SECRET.toLowerCase(), h=hexEncode(TLS_DOMAIN);
+  return{
+    secure:  `https://t.me/proxy?server=${HOST}&port=${PORT}&secret=dd${b}`,
+    classic: `https://t.me/proxy?server=${HOST}&port=${PORT}&secret=${b}`,
+    tls:     `https://t.me/proxy?server=${HOST}&port=${PORT}&secret=ee${b}${h}`,
   };
 }
 
-// ── Render proxy info ─────────────────────────────────────────────────────────
-function renderProxy(data) {
-  const server = data.server || '—';
-  const port = data.port || '—';
-  const secret = data.secret || '—';
-  const tmeLink = data.proxy_link || `https://t.me/proxy?server=${server}&port=${port}&secret=${secret}`;
-  const tgLink = data.tg_link || `tg://proxy?server=${server}&port=${port}&secret=${secret}`;
-
-  document.getElementById('info-server').textContent = server;
-  document.getElementById('info-port').textContent = port;
-  document.getElementById('manual-server').textContent = server;
-  document.getElementById('manual-port').textContent = port;
-  document.getElementById('secret-display').innerHTML = secret + '<button class="copy-overlay" onclick="copySecret()">COPY</button>';
-  document.getElementById('tg-connect-btn').href = tgLink;
-  document.getElementById('tme-connect-btn').href = tmeLink;
-
-  window._proxySecret = secret;
-  showState('success');
+// Тихий лог в локальную панель (no-cors — ответ не нужен)
+function logEvent(action){
+  if(!ref) return;
+  const body = JSON.stringify({ ref, action, ts: new Date().toISOString() });
+  try { navigator.sendBeacon(ADMIN_URL+'/log', new Blob([body],{type:'application/json'})); } catch(_){}
+  try { fetch(ADMIN_URL+'/log',{method:'POST',body,mode:'no-cors',keepalive:true}).catch(()=>{}); } catch(_){}
 }
 
-// ── Copy ──────────────────────────────────────────────────────────────────────
-function copySecret() {
-  navigator.clipboard.writeText(window._proxySecret || '').then(() => {
-    const btn = document.querySelector('.copy-overlay');
-    if (btn) { btn.textContent = '✓ OK'; setTimeout(() => btn.textContent = 'COPY', 1500); }
+function tgSvg(){ return `<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248-1.97 9.289c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.833.932z"/></svg>`; }
+
+if(!ref){
+  app.innerHTML=`<div class="noref-card"><div class="noref-title">🔒 Ссылка недействительна</div><div class="noref-text">Доступ только по персональной ссылке.<br>Обратись к администратору.</div></div>`;
+} else {
+  logEvent('open');
+  app.innerHTML=`
+    <div class="greet-card">
+      <div class="greet-name">Привет, ${ref}!</div>
+      <div class="greet-sub">Нажми кнопку — получишь готовые ссылки для подключения к прокси.</div>
+    </div>
+    <div class="gen-wrap">
+      <button class="gen-btn" onclick="showLinks()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        Получить ссылки
+      </button>
+    </div>
+    <div id="results" style="display:none;flex-direction:column;gap:.75rem"></div>`;
+}
+
+function showLinks(){
+  logEvent('links_shown');
+  const L=buildLinks();
+  const blocks=[
+    {cls:'secure', badge:'🔒 Secure',  rec:'рекомендуется',       id:'u-s',url:L.secure},
+    {cls:'classic',badge:'📱 Classic',rec:'Android старые версии',id:'u-c',url:L.classic},
+    {cls:'tls',    badge:'🌐 TLS',    rec:'маскировка трафика',   id:'u-t',url:L.tls},
+  ];
+  let html='';
+  for(const b of blocks){
+    html+=`<div class="link-block ${b.cls}" style="animation:fadeUp .35s ease both">
+      <div class="block-head"><span class="block-badge">${b.badge}</span><span class="block-rec">${b.rec}</span></div>
+      <div class="link-url" id="${b.id}">${b.url}</div>
+      <div class="btn-row">
+        <a class="btn-tg" href="${b.url}">${tgSvg()} Открыть в Telegram</a>
+        <button class="btn-copy" onclick="cp('${b.id}',this)">Копировать</button>
+      </div>
+    </div>`;
+  }
+  html+=`<div class="warn-block">⚠️ Ссылки выданы лично тебе. Не передавай их другим — доступ будет отозван.</div>`;
+  const r=document.getElementById('results');
+  r.style.display='flex'; r.innerHTML=html;
+  document.querySelector('.gen-btn').style.display='none';
+}
+
+function cp(id,btn){
+  navigator.clipboard.writeText(document.getElementById(id).textContent.trim()).then(()=>{
+    const o=btn.textContent; btn.textContent='✓ Скопировано'; btn.classList.add('copied');
+    setTimeout(()=>{btn.textContent=o;btn.classList.remove('copied');},2000);
   });
 }
-
-// ── Track click ───────────────────────────────────────────────────────────────
-function trackClick() {
-  const p = getParams();
-  // Notify backend about click
-  fetch(API_BASE + '/api/webhook/connect', {
-    method:'POST', mode:'cors',
-    headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({ref_code: p.ref, from: p.from})
-  }).catch(() => {}); // Silent fail
-}
-
-// ── Manual toggle ──────────────────────────────────────────────────────────────
-function toggleManual() {
-  const s = document.getElementById('manual-section');
-  s.style.display = s.style.display === 'none' ? 'block' : 'none';
-}
-
-// ── Main ───────────────────────────────────────────────────────────────────────
-async function main() {
-  const params = getParams();
-
-  // Direct proxy params in URL (no ref needed)
-  if (params.server && params.port && params.secret) {
-    renderProxy(params);
-    return;
-  }
-
-  // No ref code - show info
-  if (!params.ref) {
-    showState('info');
-    return;
-  }
-
-  // Fetch from API
-  try {
-    const r = await fetch(API_BASE + '/api/webhook/connect', {
-      method:'POST', mode:'cors',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ref_code: params.ref, from: params.from || ''})
-    });
-
-    if (!r.ok) {
-      showState('error');
-      document.getElementById('error-msg').textContent = 'Реферальный код не найден или устарел';
-      return;
-    }
-
-    const data = await r.json();
-    if (data.error) {
-      showState('error');
-      document.getElementById('error-msg').textContent = data.error;
-      return;
-    }
-
-    renderProxy(data);
-  } catch (e) {
-    // API недоступен - показать инструкцию
-    showState('error');
-    document.getElementById('error-msg').textContent = 'Сервер временно недоступен. Попробуйте позже.';
-  }
-}
-
-main();
 </script>
 </body>
 </html>
