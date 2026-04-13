@@ -22,7 +22,6 @@
   --accent2: #5bc4ff;
   --green: #22d980;
   --purple: #a78bfa;
-  --yellow: #f5c542;
   --font: 'Onest', sans-serif;
   --mono: 'JetBrains Mono', monospace;
 }
@@ -206,6 +205,7 @@ h1 {
   border-color: rgba(34,217,128,0.4);
 }
 
+/* DONATE секция — упрощённая */
 .donate-card {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -227,66 +227,35 @@ h1 {
   margin: 0 auto 24px;
   font-size: 14px;
 }
-.donate-buttons {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 12px;
-  margin-bottom: 20px;
-}
-
-.bank-btn {
+.donate-phone {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 12px 24px;
-  border-radius: 60px;
-  font-size: 14px;
-  font-weight: 600;
-  text-decoration: none;
-  transition: 0.2s;
-  cursor: pointer;
-  background: rgba(255,255,255,0.03);
+  gap: 12px;
+  background: var(--surface2);
   border: 1px solid var(--border);
-  color: #e0e7f5;
+  border-radius: 16px;
+  padding: 14px 24px;
+  font-family: var(--mono);
+  font-size: 16px;
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.15s;
 }
-.bank-btn.sbp {
-  background: rgba(43,154,243,0.1);
-  border-color: rgba(43,154,243,0.3);
-  color: #8bcbff;
-}
-.bank-btn.sber { color: #2ceb8c; border-color: rgba(0,175,91,0.3); }
-.bank-btn.tbank { color: #ffdd44; border-color: rgba(255,221,0,0.25); }
-.bank-btn.alfa { color: #ff7b7b; border-color: rgba(239,49,49,0.25); }
-.bank-btn:hover {
-  transform: translateY(-2px);
-  background: rgba(255,255,255,0.08);
+.donate-phone:hover {
   border-color: var(--border2);
+  background: rgba(255,255,255,0.05);
 }
-
-/* Кнопки Intent — скрыты по умолчанию, показываются только на Android */
-.btn-intent {
-  display: none;
+.donate-phone.copied {
+  border-color: rgba(34,217,128,0.4);
+  color: var(--green);
 }
-
-.note-hidden {
-  font-size: 11px;
+.donate-hint {
+  display: block;
+  margin-top: 14px;
+  font-size: 12px;
   color: var(--muted);
   font-family: var(--mono);
-  margin-top: 12px;
 }
-.note-hidden button {
-  background: none;
-  border: none;
-  color: var(--accent);
-  cursor: pointer;
-  font-family: var(--mono);
-  font-size: 11px;
-  padding: 0;
-  margin-left: 4px;
-  text-decoration: underline;
-}
-.note-hidden button:hover { color: var(--accent2); }
 
 footer {
   text-align: center;
@@ -339,9 +308,9 @@ footer a { color: var(--accent); text-decoration: none; }
   .donate-card { padding: 20px 16px; }
   .donate-card h3 { font-size: 20px; }
   .donate-card p { font-size: 13px; margin-bottom: 18px; }
-  .bank-btn { padding: 8px 18px; font-size: 12px; }
-  .note-hidden { font-size: 9px; }
-  .toast { font-size: 11px; white-space: nowrap; padding: 8px 18px; }
+  .donate-phone { padding: 12px 20px; font-size: 14px; }
+  .donate-hint { font-size: 11px; }
+  .toast { font-size: 11px; padding: 8px 18px; }
 }
 
 @media (max-width: 480px) {
@@ -349,8 +318,7 @@ footer a { color: var(--accent); text-decoration: none; }
   .btn { flex: 1; justify-content: center; }
   .proxy-card { flex-direction: column; align-items: stretch; }
   .proxy-info { text-align: center; }
-  .donate-buttons { gap: 8px; }
-  .bank-btn { padding: 8px 14px; font-size: 11px; }
+  .donate-phone { width: 100%; justify-content: center; }
 }
 </style>
 </head>
@@ -418,50 +386,16 @@ footer a { color: var(--accent); text-decoration: none; }
     </div>
   </div>
 
-  <!-- DONATE -->
+  <!-- DONATE: только копирование телефона -->
   <div class="donate-card">
     <div class="donate-icon">☕</div>
     <h3>Поддержать проект</h3>
-    <p>Прокси работает бесплатно. Если он вам помогает — поддержите сервер.</p>
-    <div class="donate-buttons">
-      <!-- СБП -->
-      <a href="#" class="bank-btn sbp" onclick="copyPhoneSBP(event)">💳 СБП (по номеру)</a>
-
-      <!-- СберБанк: веб + intent -->
-      <a href="https://www.sberbank.ru/ru/person/translations/phone?phone=79529285474" 
-         class="bank-btn sber" target="_blank" rel="noopener noreferrer">🏦 СберБанк</a>
-      <a href="#" class="btn-intent btn sber" 
-         onclick="openIntent('sber', event)" 
-         data-scheme="sberbankonline://transfer/phone?phone=79529285474"
-         data-fallback="https://www.sberbank.ru/ru/person/translations/phone?phone=79529285474"
-         data-name="Сбер"
-         data-package="ru.sberbankmobile">🏦 СберБанк (приложение)</a>
-
-      <!-- Т-Банк: веб + intent -->
-      <a href="https://www.tbank.ru/payments/phone/?phone=79529285474" 
-         class="bank-btn tbank" target="_blank" rel="noopener noreferrer">🟡 Т-Банк</a>
-      <a href="#" class="btn-intent btn tbank" 
-         onclick="openIntent('tbank', event)"
-         data-scheme1="tbank://pay/transfer?recipient=79529285474"
-         data-scheme2="tbank://transfer?phone=79529285474"
-         data-fallback="https://www.tbank.ru/payments/phone/?phone=79529285474"
-         data-name="Т-Банк"
-         data-package="ru.tinkoff">🟡 Т-Банк (приложение)</a>
-
-      <!-- Альфа-Банк: веб + intent -->
-      <a href="https://alfabank.ru/payments/transfer/?phone=79529285474" 
-         class="bank-btn alfa" target="_blank" rel="noopener noreferrer">🔴 Альфа-Банк</a>
-      <a href="#" class="btn-intent btn alfa" 
-         onclick="openIntent('alfa', event)"
-         data-scheme="alfamobile://transfer?phone=79529285474"
-         data-fallback="https://alfabank.ru/payments/transfer/?phone=79529285474"
-         data-name="Альфа-Банк"
-         data-package="ru.alfabank">🔴 Альфа-Банк (приложение)</a>
-    </div>
-    <div class="note-hidden">
-      🔐 Номер скрыт — перевод через приложение банка
-      <button type="button" onclick="showPhoneManual()">показать вручную</button>
-    </div>
+    <p>Прокси работает бесплатно. Если он вам помогает — поддержите сервер через СБП.</p>
+    
+    <button class="donate-phone" id="donatePhoneBtn" onclick="copyPhoneForDonate()">
+      📱 +7 952 928-54-74
+    </button>
+    <span class="donate-hint">Нажмите, чтобы скопировать номер для СБП</span>
   </div>
 
   <footer>
@@ -472,147 +406,83 @@ footer a { color: var(--accent); text-decoration: none; }
 <div class="toast" id="toast"></div>
 
 <script>
-// Номер телефона — скрыт в скрипте
-const SECRET_PHONE = "+79529285474";
-const RAW_PHONE = "79529285474";
+// Номер телефона — хранится в скрипте, не в разметке
+const PHONE_RAW = "79529285474";
+const PHONE_FORMATTED = "+7 952 928-54-74";
 
 function showToast(msg) {
   const toast = document.getElementById('toast');
   toast.textContent = msg;
   toast.classList.add('show');
-  setTimeout(() => toast.classList.remove('show'), 3000);
+  setTimeout(() => toast.classList.remove('show'), 2500);
 }
 
 function copyProxy(url, btn) {
   navigator.clipboard.writeText(url).then(() => {
-    const originalHTML = btn.innerHTML;
+    const original = btn.innerHTML;
     btn.classList.add('copied');
     btn.innerHTML = '✓';
     showToast('Ссылка скопирована');
     setTimeout(() => {
       btn.classList.remove('copied');
-      btn.innerHTML = originalHTML;
+      btn.innerHTML = original;
     }, 1800);
   }).catch(() => showToast('Не удалось скопировать'));
 }
 
-// Копирование номера телефона для СБП
-function copyPhoneSBP(event) {
-  event.preventDefault();
+// Копирование номера для доната
+function copyPhoneForDonate() {
+  const btn = document.getElementById('donatePhoneBtn');
   
-  const copyFallback = () => {
-    const textarea = document.createElement('textarea');
-    textarea.value = SECRET_PHONE;
-    textarea.style.position = 'fixed';
-    textarea.style.opacity = '0';
-    textarea.style.left = '-9999px';
-    document.body.appendChild(textarea);
-    textarea.focus();
-    textarea.select();
+  const doCopy = () => {
+    navigator.clipboard.writeText(PHONE_RAW).then(() => {
+      btn.classList.add('copied');
+      btn.innerHTML = '✓ Скопировано';
+      showToast('📋 Номер скопирован. Вставьте в приложении банка → СБП');
+      setTimeout(() => {
+        btn.classList.remove('copied');
+        btn.innerHTML = `📱 ${PHONE_FORMATTED}`;
+      }, 2000);
+    }).catch(fallbackCopy);
+  };
+  
+  const fallbackCopy = () => {
+    // Резервный метод для старых браузеров
+    const ta = document.createElement('textarea');
+    ta.value = PHONE_RAW;
+    ta.style.cssText = 'position:fixed;opacity:0;left:-9999px';
+    document.body.appendChild(ta);
+    ta.select();
     try {
       document.execCommand('copy');
-      showToast('📋 Номер скопирован. В приложении: Платежи → СБП → Вставить');
+      btn.classList.add('copied');
+      btn.innerHTML = '✓ Скопировано';
+      showToast('📋 Номер скопирован. Вставьте в приложении банка → СБП');
+      setTimeout(() => {
+        btn.classList.remove('copied');
+        btn.innerHTML = `📱 ${PHONE_FORMATTED}`;
+      }, 2000);
     } catch (e) {
-      showToast('⚠️ Скопируйте вручную: +7 952 928-54-74');
+      showToast(`⚠️ Скопируйте вручную: ${PHONE_FORMATTED}`);
     }
-    document.body.removeChild(textarea);
+    document.body.removeChild(ta);
   };
   
   if (navigator.clipboard?.writeText) {
-    navigator.clipboard.writeText(SECRET_PHONE)
-      .then(() => showToast('📋 Номер скопирован. В приложении: Платежи → СБП → Вставить'))
-      .catch(copyFallback);
+    doCopy();
   } else {
-    copyFallback();
+    fallbackCopy();
   }
 }
 
-// Показать номер вручную (последний фоллбэк)
-function showPhoneManual() {
-  const msg = 'Номер для перевода:\n+7 952 928-54-74\n\nСкопировать в буфер?';
-  if (confirm(msg)) {
-    copyPhoneSBP({ preventDefault: () => {} });
-  }
-}
-
-// Функция открытия Intent-ссылок на Android
-function openIntent(bank, event) {
-  event.preventDefault();
-  const btn = event.currentTarget;
-  
-  const name = btn.dataset.name;
-  const fallback = btn.dataset.fallback;
-  const pkg = btn.dataset.package;
-  
-  showToast(`Пробуем открыть ${name}...`);
-  
-  if (/Android/i.test(navigator.userAgent)) {
-    if (bank === 'sber') {
-      const scheme = btn.dataset.scheme;
-      const intentUrl = buildIntentUrl(scheme, pkg, fallback);
-      window.location.href = intentUrl;
-    } 
-    else if (bank === 'tbank') {
-      const scheme1 = btn.dataset.scheme1;
-      const intentUrl1 = buildIntentUrl(scheme1, pkg, fallback);
-      window.location.href = intentUrl1;
-      // Вторая схема как запасной вариант
-      setTimeout(() => {
-        const scheme2 = btn.dataset.scheme2;
-        const intentUrl2 = buildIntentUrl(scheme2, pkg, fallback);
-        window.location.href = intentUrl2;
-      }, 1200);
-    } 
-    else if (bank === 'alfa') {
-      const scheme = btn.dataset.scheme;
-      const intentUrl = buildIntentUrl(scheme, pkg, fallback);
-      window.location.href = intentUrl;
-    }
-  } else {
-    // iOS / Desktop: пробуем обычную схему
-    if (bank === 'sber' || bank === 'alfa') {
-      window.location.href = btn.dataset.scheme;
-    } else if (bank === 'tbank') {
-      window.location.href = btn.dataset.scheme1;
-      setTimeout(() => { window.location.href = btn.dataset.scheme2; }, 1000);
-    }
-    // Фоллбэк на веб, если схема не сработала
-    setTimeout(() => {
-      if (!document.hidden) {
-        window.open(fallback, '_blank', 'noopener');
-        showToast(`🌐 ${name}: открыта веб-версия`);
-      }
-    }, 2000);
-  }
-}
-
-// Сборка Intent URL для Android
-function buildIntentUrl(scheme, packageName, fallbackUrl) {
-  try {
-    const schemeName = scheme.split('://')[0];
-    const schemePath = scheme.split('://')[1];
-    // Кодируем fallback для безопасной вставки в intent
-    const encodedFallback = encodeURIComponent(fallbackUrl);
-    return `intent://${schemePath}#Intent;scheme=${schemeName};package=${packageName};S.browser_fallback_url=${encodedFallback};end`;
-  } catch (e) {
-    console.warn('Intent build error:', e);
-    return fallbackUrl;
-  }
-}
-
-// Показываем кнопки Intent только на Android
+// Защита от авто-линков на iOS
 document.addEventListener('DOMContentLoaded', () => {
-  const intents = document.querySelectorAll('.btn-intent');
-  if (/Android/i.test(navigator.userAgent)) {
-    intents.forEach(el => el.style.display = 'inline-flex');
-  }
-  
-  // Защита от авто-определения телефона на iOS
-  const meta = document.createElement('meta');
-  meta.name = 'format-detection';
-  meta.content = 'telephone=no';
-  if (!document.querySelector('meta[name="format-detection"]')) {
-    document.head.appendChild(meta);
+  const meta = document.querySelector('meta[name="format-detection"]');
+  if (!meta) {
+    const m = document.createElement('meta');
+    m.name = 'format-detection';
+    m.content = 'telephone=no';
+    document.head.appendChild(m);
   }
 });
 </script>
