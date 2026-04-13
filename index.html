@@ -8,11 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
 :root {
   --bg: #050810;
@@ -39,7 +35,6 @@ body {
   line-height: 1.5;
 }
 
-/* фон с эффектами */
 body::before {
   content: '';
   position: fixed;
@@ -58,7 +53,6 @@ body::before {
   padding: 20px 24px 40px;
 }
 
-/* ===== header ===== */
 .status-pill {
   display: inline-flex;
   align-items: center;
@@ -73,9 +67,7 @@ body::before {
   margin-bottom: 24px;
 }
 .status-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
+  width: 8px; height: 8px; border-radius: 50%;
   background: var(--green);
   animation: pulse 2s infinite;
 }
@@ -102,7 +94,6 @@ h1 {
   max-width: 520px;
 }
 
-/* спеки */
 .spec-grid {
   display: flex;
   flex-wrap: wrap;
@@ -131,7 +122,6 @@ h1 {
 .spec-value.blue { color: var(--accent2); }
 .spec-value.purple { color: var(--purple); }
 
-/* прокси карточки */
 .proxy-grid {
   display: flex;
   flex-direction: column;
@@ -149,9 +139,8 @@ h1 {
   flex-wrap: wrap;
   transition: border-color 0.2s;
 }
-.proxy-card:hover {
-  border-color: var(--border2);
-}
+.proxy-card:hover { border-color: var(--border2); }
+
 .proxy-badge {
   font-family: var(--mono);
   font-size: 12px;
@@ -164,15 +153,8 @@ h1 {
 .badge-classic { background: rgba(34,217,128,0.1); color: var(--green); border: 1px solid rgba(34,217,128,0.2); }
 .badge-tls { background: rgba(167,139,250,0.1); color: var(--purple); border: 1px solid rgba(167,139,250,0.2); }
 
-.proxy-info {
-  flex: 1;
-  min-width: 180px;
-}
-.proxy-desc {
-  font-size: 14px;
-  font-weight: 500;
-  margin-bottom: 6px;
-}
+.proxy-info { flex: 1; min-width: 180px; }
+.proxy-desc { font-size: 14px; font-weight: 500; margin-bottom: 6px; }
 .proxy-secret {
   font-family: var(--mono);
   font-size: 11px;
@@ -185,6 +167,7 @@ h1 {
   gap: 10px;
   flex-shrink: 0;
 }
+
 .btn {
   display: inline-flex;
   align-items: center;
@@ -223,7 +206,6 @@ h1 {
   border-color: rgba(34,217,128,0.4);
 }
 
-/* донат блок */
 .donate-card {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -232,10 +214,7 @@ h1 {
   text-align: center;
   margin: 20px 0 16px;
 }
-.donate-icon {
-  font-size: 42px;
-  margin-bottom: 12px;
-}
+.donate-icon { font-size: 42px; margin-bottom: 12px; }
 .donate-card h3 {
   font-size: 24px;
   font-weight: 700;
@@ -255,6 +234,7 @@ h1 {
   gap: 12px;
   margin-bottom: 20px;
 }
+
 .bank-btn {
   display: inline-flex;
   align-items: center;
@@ -283,6 +263,12 @@ h1 {
   background: rgba(255,255,255,0.08);
   border-color: var(--border2);
 }
+
+/* Кнопки Intent — скрыты по умолчанию, показываются только на Android */
+.btn-intent {
+  display: none;
+}
+
 .note-hidden {
   font-size: 11px;
   color: var(--muted);
@@ -300,9 +286,7 @@ h1 {
   margin-left: 4px;
   text-decoration: underline;
 }
-.note-hidden button:hover {
-  color: var(--accent2);
-}
+.note-hidden button:hover { color: var(--accent2); }
 
 footer {
   text-align: center;
@@ -311,10 +295,7 @@ footer {
   font-size: 12px;
   font-family: var(--mono);
 }
-footer a {
-  color: var(--accent);
-  text-decoration: none;
-}
+footer a { color: var(--accent); text-decoration: none; }
 
 .toast {
   position: fixed;
@@ -443,10 +424,39 @@ footer a {
     <h3>Поддержать проект</h3>
     <p>Прокси работает бесплатно. Если он вам помогает — поддержите сервер.</p>
     <div class="donate-buttons">
+      <!-- СБП -->
       <a href="#" class="bank-btn sbp" onclick="copyPhoneSBP(event)">💳 СБП (по номеру)</a>
-      <a href="#" class="bank-btn sber" onclick="openBankApp('sber', event)">🏦 СберБанк</a>
-      <a href="#" class="bank-btn tbank" onclick="openBankApp('tbank', event)">🟡 Т-Банк</a>
-      <a href="#" class="bank-btn alfa" onclick="openBankApp('alfa', event)">🔴 Альфа-Банк</a>
+
+      <!-- СберБанк: веб + intent -->
+      <a href="https://www.sberbank.ru/ru/person/translations/phone?phone=79529285474" 
+         class="bank-btn sber" target="_blank" rel="noopener noreferrer">🏦 СберБанк</a>
+      <a href="#" class="btn-intent btn sber" 
+         onclick="openIntent('sber', event)" 
+         data-scheme="sberbankonline://transfer/phone?phone=79529285474"
+         data-fallback="https://www.sberbank.ru/ru/person/translations/phone?phone=79529285474"
+         data-name="Сбер"
+         data-package="ru.sberbankmobile">🏦 СберБанк (приложение)</a>
+
+      <!-- Т-Банк: веб + intent -->
+      <a href="https://www.tbank.ru/payments/phone/?phone=79529285474" 
+         class="bank-btn tbank" target="_blank" rel="noopener noreferrer">🟡 Т-Банк</a>
+      <a href="#" class="btn-intent btn tbank" 
+         onclick="openIntent('tbank', event)"
+         data-scheme1="tbank://pay/transfer?recipient=79529285474"
+         data-scheme2="tbank://transfer?phone=79529285474"
+         data-fallback="https://www.tbank.ru/payments/phone/?phone=79529285474"
+         data-name="Т-Банк"
+         data-package="ru.tinkoff">🟡 Т-Банк (приложение)</a>
+
+      <!-- Альфа-Банк: веб + intent -->
+      <a href="https://alfabank.ru/payments/transfer/?phone=79529285474" 
+         class="bank-btn alfa" target="_blank" rel="noopener noreferrer">🔴 Альфа-Банк</a>
+      <a href="#" class="btn-intent btn alfa" 
+         onclick="openIntent('alfa', event)"
+         data-scheme="alfamobile://transfer?phone=79529285474"
+         data-fallback="https://alfabank.ru/payments/transfer/?phone=79529285474"
+         data-name="Альфа-Банк"
+         data-package="ru.alfabank">🔴 Альфа-Банк (приложение)</a>
     </div>
     <div class="note-hidden">
       🔐 Номер скрыт — перевод через приложение банка
@@ -466,14 +476,11 @@ footer a {
 const SECRET_PHONE = "+79529285474";
 const RAW_PHONE = "79529285474";
 
-// Флаг: приложение банка было открыто
-window._bankAppOpened = false;
-
 function showToast(msg) {
   const toast = document.getElementById('toast');
   toast.textContent = msg;
   toast.classList.add('show');
-  setTimeout(() => toast.classList.remove('show'), 2200);
+  setTimeout(() => toast.classList.remove('show'), 3000);
 }
 
 function copyProxy(url, btn) {
@@ -489,72 +496,7 @@ function copyProxy(url, btn) {
   }).catch(() => showToast('Не удалось скопировать'));
 }
 
-// Универсальная функция открытия банка с фоллбэком
-function openBankApp(bank, event) {
-  event.preventDefault();
-  window._bankAppOpened = false;
-  
-  const fallbackWeb = {
-    sber: `https://www.sberbank.ru/ru/person/translations/phone?phone=${RAW_PHONE}`,
-    tbank: `https://www.tbank.ru/payments/phone/?phone=${RAW_PHONE}`,
-    alfa: `https://alfabank.ru/payments/transfer/?phone=${RAW_PHONE}`
-  };
-  
-  const deepLinks = {
-    sber: `sberbankonline://transfer/phone?phone=${RAW_PHONE}`,
-    tbank: `tinkoff://transfer/phone?phone=${RAW_PHONE}`,
-    alfa: `alfamobile://transfer?phone=${RAW_PHONE}`
-  };
-
-  const bankNames = {
-    sber: 'СберБанк',
-    tbank: 'Т-Банк',
-    alfa: 'Альфа-Банк'
-  };
-
-  const tryOpen = (scheme, webFallback, bankKey) => {
-    const start = Date.now();
-    window.location.href = scheme;
-    
-    setTimeout(() => {
-      // Если страница всё ещё видима и не прошло много времени — приложение не открылось
-      if (!window._bankAppOpened && !document.hidden && Date.now() - start < 2500) {
-        window.open(webFallback, '_blank', 'noopener');
-        showToast(`🌐 ${bankNames[bankKey]}: открыта веб-версия`);
-      }
-    }, 1800);
-  };
-
-  if (bank === 'sber') {
-    tryOpen(deepLinks.sber, fallbackWeb.sber, 'sber');
-    showToast('🟢 Пробуем открыть СберБанк...');
-  } 
-  else if (bank === 'tbank') {
-    // Т-Банк: пробуем две возможные схемы
-    const start = Date.now();
-    window.location.href = deepLinks.tbank;
-    
-    setTimeout(() => {
-      if (!window._bankAppOpened && !document.hidden && Date.now() - start < 2000) {
-        // Вторая схема
-        window.location.href = `tbank://pay/transfer?recipient=${RAW_PHONE}`;
-        setTimeout(() => {
-          if (!window._bankAppOpened && !document.hidden) {
-            window.open(fallbackWeb.tbank, '_blank', 'noopener');
-            showToast('🟡 Т-Банк: открыта веб-версия');
-          }
-        }, 1500);
-      }
-    }, 1500);
-    showToast('🟡 Пробуем открыть Т-Банк...');
-  } 
-  else if (bank === 'alfa') {
-    tryOpen(deepLinks.alfa, fallbackWeb.alfa, 'alfa');
-    showToast('🔴 Пробуем открыть Альфа-Банк...');
-  }
-}
-
-// СБП: копирование номера + инструкция
+// Копирование номера телефона для СБП
 function copyPhoneSBP(event) {
   event.preventDefault();
   
@@ -563,6 +505,7 @@ function copyPhoneSBP(event) {
     textarea.value = SECRET_PHONE;
     textarea.style.position = 'fixed';
     textarea.style.opacity = '0';
+    textarea.style.left = '-9999px';
     document.body.appendChild(textarea);
     textarea.focus();
     textarea.select();
@@ -592,20 +535,85 @@ function showPhoneManual() {
   }
 }
 
-// Отслеживание перехода в приложение банка
-document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'hidden') {
-    window._bankAppOpened = true;
+// Функция открытия Intent-ссылок на Android
+function openIntent(bank, event) {
+  event.preventDefault();
+  const btn = event.currentTarget;
+  
+  const name = btn.dataset.name;
+  const fallback = btn.dataset.fallback;
+  const pkg = btn.dataset.package;
+  
+  showToast(`Пробуем открыть ${name}...`);
+  
+  if (/Android/i.test(navigator.userAgent)) {
+    if (bank === 'sber') {
+      const scheme = btn.dataset.scheme;
+      const intentUrl = buildIntentUrl(scheme, pkg, fallback);
+      window.location.href = intentUrl;
+    } 
+    else if (bank === 'tbank') {
+      const scheme1 = btn.dataset.scheme1;
+      const intentUrl1 = buildIntentUrl(scheme1, pkg, fallback);
+      window.location.href = intentUrl1;
+      // Вторая схема как запасной вариант
+      setTimeout(() => {
+        const scheme2 = btn.dataset.scheme2;
+        const intentUrl2 = buildIntentUrl(scheme2, pkg, fallback);
+        window.location.href = intentUrl2;
+      }, 1200);
+    } 
+    else if (bank === 'alfa') {
+      const scheme = btn.dataset.scheme;
+      const intentUrl = buildIntentUrl(scheme, pkg, fallback);
+      window.location.href = intentUrl;
+    }
+  } else {
+    // iOS / Desktop: пробуем обычную схему
+    if (bank === 'sber' || bank === 'alfa') {
+      window.location.href = btn.dataset.scheme;
+    } else if (bank === 'tbank') {
+      window.location.href = btn.dataset.scheme1;
+      setTimeout(() => { window.location.href = btn.dataset.scheme2; }, 1000);
+    }
+    // Фоллбэк на веб, если схема не сработала
+    setTimeout(() => {
+      if (!document.hidden) {
+        window.open(fallback, '_blank', 'noopener');
+        showToast(`🌐 ${name}: открыта веб-версия`);
+      }
+    }, 2000);
   }
-});
+}
 
-// Предотвращение автоматического определения телефона браузером
+// Сборка Intent URL для Android
+function buildIntentUrl(scheme, packageName, fallbackUrl) {
+  try {
+    const schemeName = scheme.split('://')[0];
+    const schemePath = scheme.split('://')[1];
+    // Кодируем fallback для безопасной вставки в intent
+    const encodedFallback = encodeURIComponent(fallbackUrl);
+    return `intent://${schemePath}#Intent;scheme=${schemeName};package=${packageName};S.browser_fallback_url=${encodedFallback};end`;
+  } catch (e) {
+    console.warn('Intent build error:', e);
+    return fallbackUrl;
+  }
+}
+
+// Показываем кнопки Intent только на Android
 document.addEventListener('DOMContentLoaded', () => {
-  // Дополнительная защита от авто-линков на iOS
+  const intents = document.querySelectorAll('.btn-intent');
+  if (/Android/i.test(navigator.userAgent)) {
+    intents.forEach(el => el.style.display = 'inline-flex');
+  }
+  
+  // Защита от авто-определения телефона на iOS
   const meta = document.createElement('meta');
   meta.name = 'format-detection';
   meta.content = 'telephone=no';
-  document.head.appendChild(meta);
+  if (!document.querySelector('meta[name="format-detection"]')) {
+    document.head.appendChild(meta);
+  }
 });
 </script>
 </body>
