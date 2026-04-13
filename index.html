@@ -2,26 +2,27 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>MTProxy · Telegram</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Telegram MTProxy · без цензуры</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  -webkit-tap-highlight-color: transparent;
 }
 
 :root {
   --bg: #050810;
   --surface: #0b0f1a;
   --surface2: #111827;
-  --border: rgba(255,255,255,0.06);
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.12);
   --text: #d1d9e8;
   --muted: #5a6a85;
   --accent: #2b9af3;
+  --accent2: #5bc4ff;
   --green: #22d980;
   --purple: #a78bfa;
   --yellow: #f5c542;
@@ -33,278 +34,289 @@ body {
   background: var(--bg);
   color: var(--text);
   font-family: var(--font);
-  font-size: 13px;
-  line-height: 1.4;
-  height: 100vh;
-  overflow: hidden;
-  position: fixed;
-  width: 100%;
+  min-height: 100vh;
+  line-height: 1.5;
 }
 
-/* минимальный фон */
+/* фон с эффектами */
 body::before {
   content: '';
   position: fixed;
   inset: 0;
-  background: radial-gradient(ellipse 100% 70% at 50% 0%, rgba(43,154,243,0.08), transparent 70%);
+  background: radial-gradient(ellipse 80% 60% at 20% 10%, rgba(43,154,243,0.06), transparent 60%),
+              radial-gradient(ellipse 60% 40% at 80% 85%, rgba(167,139,250,0.04), transparent 60%);
   pointer-events: none;
   z-index: 0;
 }
 
-.app {
+.container {
   position: relative;
   z-index: 2;
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  padding: 16px 14px 20px;
-  overflow-y: auto;
-  scrollbar-width: none;
-}
-.app::-webkit-scrollbar {
-  display: none;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 20px 24px 40px;
 }
 
-/* компактный статус */
-.status-row {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 12px;
-}
+/* ===== header ===== */
 .status-pill {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   background: rgba(34,217,128,0.08);
   border: 1px solid rgba(34,217,128,0.2);
-  border-radius: 40px;
-  padding: 4px 12px;
-  font-size: 9px;
+  border-radius: 100px;
+  padding: 6px 18px;
+  font-size: 13px;
   font-family: var(--mono);
   color: var(--green);
-  letter-spacing: 0.2px;
+  margin-bottom: 24px;
 }
 .status-dot {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   background: var(--green);
-  animation: blink 2s infinite;
+  animation: pulse 2s infinite;
 }
-@keyframes blink {
-  0%,100%{opacity:1;} 50%{opacity:0.5;}
+@keyframes pulse {
+  0%,100%{ opacity:1; box-shadow:0 0 0 0 rgba(34,217,128,0.4); }
+  50%{ opacity:0.6; box-shadow:0 0 0 4px rgba(34,217,128,0); }
 }
 
 h1 {
-  font-size: 26px;
+  font-size: clamp(32px, 5vw, 56px);
   font-weight: 800;
-  letter-spacing: -1px;
-  text-align: center;
-  background: linear-gradient(135deg, #fff, #8bb8e8, var(--accent));
+  letter-spacing: -1.5px;
+  background: linear-gradient(135deg, #ffffff, #8bb8e8, var(--accent));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  margin-bottom: 6px;
+  background-clip: text;
+  margin-bottom: 12px;
   line-height: 1.2;
 }
-.sub {
-  text-align: center;
-  font-size: 11px;
+.subhead {
+  font-size: 16px;
   color: var(--muted);
-  margin-bottom: 18px;
+  margin-bottom: 32px;
+  max-width: 520px;
 }
 
-/* спеки одной строкой */
-.specs-mini {
+/* спеки */
+.spec-grid {
   display: flex;
-  justify-content: space-between;
+  flex-wrap: wrap;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 20px;
-  padding: 8px 14px;
-  margin-bottom: 16px;
-  gap: 8px;
-  flex-wrap: wrap;
+  padding: 16px 24px;
+  margin-bottom: 32px;
+  gap: 16px;
+  justify-content: space-between;
 }
-.spec-mini-item {
+.spec-item {
   display: flex;
   align-items: baseline;
-  gap: 6px;
+  gap: 8px;
   font-family: var(--mono);
-  font-size: 9px;
+  font-size: 12px;
   color: var(--muted);
 }
-.spec-mini-value {
+.spec-value {
   font-weight: 700;
+  font-size: 18px;
   color: var(--text);
-  font-size: 11px;
 }
-.green-dot {
-  color: var(--green);
-  font-size: 10px;
-}
+.spec-value.green { color: var(--green); }
+.spec-value.blue { color: var(--accent2); }
+.spec-value.purple { color: var(--purple); }
 
-/* карточки прокси - компактные */
-.proxy-list {
+/* прокси карточки */
+.proxy-grid {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin-bottom: 16px;
+  gap: 14px;
+  margin-bottom: 36px;
 }
 .proxy-card {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 10px 12px;
+  border-radius: 20px;
+  padding: 20px 24px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 20px;
   flex-wrap: wrap;
+  transition: border-color 0.2s;
+}
+.proxy-card:hover {
+  border-color: var(--border2);
 }
 .proxy-badge {
-  font-size: 9px;
   font-family: var(--mono);
+  font-size: 12px;
   font-weight: 700;
-  padding: 3px 8px;
-  border-radius: 30px;
-  background: rgba(255,255,255,0.04);
+  padding: 6px 16px;
+  border-radius: 40px;
   white-space: nowrap;
 }
-.badge-secure { background: rgba(43,154,243,0.15); color: var(--accent); }
-.badge-classic { background: rgba(34,217,128,0.1); color: var(--green); }
-.badge-tls { background: rgba(167,139,250,0.12); color: var(--purple); }
+.badge-secure { background: rgba(43,154,243,0.12); color: var(--accent2); border: 1px solid rgba(43,154,243,0.25); }
+.badge-classic { background: rgba(34,217,128,0.1); color: var(--green); border: 1px solid rgba(34,217,128,0.2); }
+.badge-tls { background: rgba(167,139,250,0.1); color: var(--purple); border: 1px solid rgba(167,139,250,0.2); }
 
 .proxy-info {
   flex: 1;
-  min-width: 120px;
+  min-width: 180px;
 }
-.proxy-name {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: -0.2px;
+.proxy-desc {
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 6px;
 }
 .proxy-secret {
   font-family: var(--mono);
-  font-size: 7px;
+  font-size: 11px;
   color: var(--muted);
-  opacity: 0.7;
   word-break: break-all;
+  opacity: 0.8;
 }
 .proxy-actions {
   display: flex;
-  gap: 6px;
+  gap: 10px;
   flex-shrink: 0;
 }
 .btn {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  gap: 4px;
-  padding: 6px 12px;
-  border-radius: 30px;
-  font-size: 10px;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: 12px;
+  font-size: 13px;
   font-weight: 600;
+  font-family: var(--font);
   text-decoration: none;
-  background: #1a2535;
   border: none;
   cursor: pointer;
-  color: var(--text);
-  font-family: var(--font);
+  transition: all 0.15s;
 }
 .btn-primary {
-  background: linear-gradient(135deg, #1e6eb0, #165a91);
+  background: linear-gradient(135deg, #2481cc, #1d6fb4);
   color: white;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  box-shadow: 0 2px 8px rgba(36,129,204,0.3);
+}
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(36,129,204,0.4);
 }
 .btn-copy {
   background: var(--surface2);
+  color: var(--muted);
   border: 1px solid var(--border);
-  padding: 6px 10px;
+  padding: 10px 16px;
+}
+.btn-copy:hover {
+  color: var(--text);
+  border-color: var(--border2);
 }
 .btn-copy.copied {
   color: var(--green);
   border-color: rgba(34,217,128,0.4);
 }
-.icon-svg {
-  width: 12px;
-  height: 12px;
-}
 
-/* донат блок — только самое важное */
-.donate-mini {
+/* донат блок */
+.donate-card {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 20px;
-  padding: 12px 12px;
+  border-radius: 24px;
+  padding: 28px 32px;
   text-align: center;
-  margin-top: 4px;
+  margin: 20px 0 16px;
 }
-.donate-title {
-  font-size: 13px;
+.donate-icon {
+  font-size: 42px;
+  margin-bottom: 12px;
+}
+.donate-card h3 {
+  font-size: 24px;
   font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
   margin-bottom: 8px;
+  color: #e8edf5;
+}
+.donate-card p {
+  color: var(--muted);
+  max-width: 460px;
+  margin: 0 auto 24px;
+  font-size: 14px;
 }
 .donate-buttons {
   display: flex;
-  gap: 8px;
-  justify-content: center;
   flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 20px;
 }
-.bank-link {
+.bank-btn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  background: rgba(255,255,255,0.03);
-  border: 1px solid var(--border);
-  border-radius: 40px;
-  padding: 6px 14px;
-  font-size: 10px;
+  gap: 8px;
+  padding: 12px 24px;
+  border-radius: 60px;
+  font-size: 14px;
   font-weight: 600;
   text-decoration: none;
-  color: #ccc;
+  transition: 0.2s;
+  cursor: pointer;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  color: #e0e7f5;
 }
-.bank-sber { color: #2ceb8c; border-color: rgba(0,175,91,0.3); }
-.bank-tbank { color: #ffdd44; border-color: rgba(255,221,0,0.25); }
-.bank-alfa { color: #ff7b7b; border-color: rgba(239,49,49,0.25); }
-.sbp-link {
+.bank-btn.sbp {
   background: rgba(43,154,243,0.1);
   border-color: rgba(43,154,243,0.3);
   color: #8bcbff;
 }
-.hint-text {
-  font-size: 8px;
+.bank-btn.sber { color: #2ceb8c; border-color: rgba(0,175,91,0.3); }
+.bank-btn.tbank { color: #ffdd44; border-color: rgba(255,221,0,0.25); }
+.bank-btn.alfa { color: #ff7b7b; border-color: rgba(239,49,49,0.25); }
+.bank-btn:hover {
+  transform: translateY(-2px);
+  background: rgba(255,255,255,0.08);
+  border-color: var(--border2);
+}
+.note-hidden {
+  font-size: 11px;
   color: var(--muted);
-  margin-top: 8px;
-  letter-spacing: 0.2px;
+  font-family: var(--mono);
+  margin-top: 12px;
 }
 
 footer {
   text-align: center;
-  font-size: 8px;
-  font-family: var(--mono);
+  padding: 28px 0 12px;
   color: var(--muted);
-  margin-top: 12px;
-  opacity: 0.6;
+  font-size: 12px;
+  font-family: var(--mono);
+}
+footer a {
+  color: var(--accent);
+  text-decoration: none;
 }
 
 .toast {
   position: fixed;
-  bottom: 20px;
+  bottom: 30px;
   left: 50%;
-  transform: translateX(-50%) translateY(70px);
-  background: #1a2535ee;
+  transform: translateX(-50%) translateY(80px);
+  background: #1a2535f0;
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255,255,255,0.1);
+  border: 1px solid var(--border2);
   color: var(--green);
-  font-size: 11px;
-  padding: 8px 16px;
+  font-family: var(--mono);
+  font-size: 13px;
+  padding: 12px 24px;
   border-radius: 40px;
-  transition: 0.2s;
+  z-index: 1000;
+  transition: transform 0.25s ease, opacity 0.25s;
   opacity: 0;
-  z-index: 200;
   white-space: nowrap;
   pointer-events: none;
 }
@@ -313,135 +325,237 @@ footer {
   opacity: 1;
 }
 
-@media (max-width: 420px) {
-  .app { padding: 12px 12px 16px; }
-  .proxy-card { padding: 8px 10px; }
-  .btn { padding: 5px 10px; font-size: 9px; }
-  .proxy-name { font-size: 10px; }
-  .donate-buttons { gap: 6px; }
-  .bank-link { padding: 5px 10px; font-size: 9px; }
+/* ===== МОБИЛЬНАЯ АДАПТАЦИЯ (крупнее, но компактно) ===== */
+@media (max-width: 700px) {
+  .container {
+    padding: 16px 16px 32px;
+  }
+  .status-pill {
+    font-size: 11px;
+    padding: 4px 14px;
+    margin-bottom: 16px;
+  }
+  h1 {
+    font-size: 28px;
+    letter-spacing: -0.5px;
+  }
+  .subhead {
+    font-size: 14px;
+    margin-bottom: 20px;
+  }
+  .spec-grid {
+    padding: 12px 16px;
+    margin-bottom: 20px;
+    gap: 12px;
+  }
+  .spec-item {
+    font-size: 10px;
+  }
+  .spec-value {
+    font-size: 15px;
+  }
+  .proxy-card {
+    padding: 14px 16px;
+    gap: 12px;
+  }
+  .proxy-badge {
+    font-size: 10px;
+    padding: 4px 12px;
+  }
+  .proxy-desc {
+    font-size: 13px;
+  }
+  .proxy-secret {
+    font-size: 9px;
+  }
+  .btn {
+    padding: 8px 14px;
+    font-size: 12px;
+  }
+  .btn-copy {
+    padding: 8px 12px;
+  }
+  .donate-card {
+    padding: 20px 16px;
+  }
+  .donate-card h3 {
+    font-size: 20px;
+  }
+  .donate-card p {
+    font-size: 13px;
+    margin-bottom: 18px;
+  }
+  .bank-btn {
+    padding: 8px 18px;
+    font-size: 12px;
+  }
+  .note-hidden {
+    font-size: 9px;
+  }
+  .toast {
+    font-size: 11px;
+    white-space: nowrap;
+    padding: 8px 18px;
+  }
+}
+
+/* совсем маленькие телефоны — чуть увеличиваем таргеты */
+@media (max-width: 480px) {
+  .proxy-actions {
+    width: 100%;
+    justify-content: stretch;
+  }
+  .btn {
+    flex: 1;
+    justify-content: center;
+  }
+  .proxy-card {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .proxy-info {
+    text-align: center;
+  }
+  .donate-buttons {
+    gap: 8px;
+  }
+  .bank-btn {
+    padding: 8px 14px;
+    font-size: 11px;
+  }
 }
 </style>
 </head>
 <body>
-<div class="app">
-  <!-- статус + шапка -->
-  <div class="status-row">
-    <div class="status-pill"><span class="status-dot"></span> wwcat.duckdns.org:8043</div>
-  </div>
-  <h1>MTProxy</h1>
-  <div class="sub">без цензуры · 3 режима</div>
 
-  <!-- характеристики одной строкой -->
-  <div class="specs-mini">
-    <div class="spec-mini-item"><span class="spec-mini-value green-dot">●</span><span>online</span></div>
-    <div class="spec-mini-item"><span class="spec-mini-value">8043</span><span>порт</span></div>
-    <div class="spec-mini-item"><span class="spec-mini-value">TLS</span><span>маскировка</span></div>
-    <div class="spec-mini-item"><span class="spec-mini-value green-dot">0</span><span>логов</span></div>
+<div class="container">
+  <div class="status-pill">
+    <span class="status-dot"></span>
+    wwcat.duckdns.org:8043 · прокси активен
   </div>
 
-  <!-- прокси карточки (максимально компактно) -->
-  <div class="proxy-list">
+  <h1>Telegram MTProxy<br>без цензуры</h1>
+  <div class="subhead">
+    Быстрый и надёжный MTProto прокси. Три режима, маскировка трафика, никакой регистрации.
+  </div>
+
+  <!-- спеки -->
+  <div class="spec-grid">
+    <div class="spec-item"><span class="spec-value green">● ONLINE</span> <span>статус</span></div>
+    <div class="spec-item"><span class="spec-value blue">8043</span> <span>порт</span></div>
+    <div class="spec-item"><span class="spec-value">3</span> <span>режима</span></div>
+    <div class="spec-item"><span class="spec-value purple">TLS</span> <span>маскировка</span></div>
+    <div class="spec-item"><span class="spec-value green">0</span> <span>логов</span></div>
+  </div>
+
+  <!-- прокси карточки -->
+  <div class="proxy-grid">
     <!-- Secure -->
     <div class="proxy-card">
       <span class="proxy-badge badge-secure">🔒 Secure</span>
       <div class="proxy-info">
-        <div class="proxy-name">cloudflare.com · шифр</div>
-        <div class="proxy-secret">dd653cab...f698852bbcf86f</div>
+        <div class="proxy-desc">Рекомендуемый · шифрование + маскировка HTTPS</div>
+        <div class="proxy-secret">dd653cab966271b2e8b4f698852bbcf86f · cloudflare.com</div>
       </div>
       <div class="proxy-actions">
-        <a href="https://t.me/proxy?server=wwcat.duckdns.org&port=8043&secret=dd653cab966271b2e8b4f698852bbcf86f" class="btn btn-primary" target="_blank">📱 TG</a>
-        <button class="btn btn-copy" onclick="copyProxyFull('https://t.me/proxy?server=wwcat.duckdns.org&port=8043&secret=dd653cab966271b2e8b4f698852bbcf86f', this)">📋</button>
+        <a href="https://t.me/proxy?server=wwcat.duckdns.org&port=8043&secret=dd653cab966271b2e8b4f698852bbcf86f" class="btn btn-primary" target="_blank">📱 Добавить в TG</a>
+        <button class="btn btn-copy" onclick="copyProxy('https://t.me/proxy?server=wwcat.duckdns.org&port=8043&secret=dd653cab966271b2e8b4f698852bbcf86f', this)">📋</button>
       </div>
     </div>
+
     <!-- Classic -->
     <div class="proxy-card">
       <span class="proxy-badge badge-classic">⚡ Classic</span>
       <div class="proxy-info">
-        <div class="proxy-name">базовый MTProto</div>
-        <div class="proxy-secret">653cab96...98bbcf86f</div>
+        <div class="proxy-desc">Базовый MTProto · максимальная совместимость</div>
+        <div class="proxy-secret">653cab966271b2e8b4f698852bbcf86f · без маскировки</div>
       </div>
       <div class="proxy-actions">
-        <a href="https://t.me/proxy?server=wwcat.duckdns.org&port=8043&secret=653cab966271b2e8b4f698852bbcf86f" class="btn btn-primary" target="_blank">📱 TG</a>
-        <button class="btn btn-copy" onclick="copyProxyFull('https://t.me/proxy?server=wwcat.duckdns.org&port=8043&secret=653cab966271b2e8b4f698852bbcf86f', this)">📋</button>
+        <a href="https://t.me/proxy?server=wwcat.duckdns.org&port=8043&secret=653cab966271b2e8b4f698852bbcf86f" class="btn btn-primary" target="_blank">📱 Добавить в TG</a>
+        <button class="btn btn-copy" onclick="copyProxy('https://t.me/proxy?server=wwcat.duckdns.org&port=8043&secret=653cab966271b2e8b4f698852bbcf86f', this)">📋</button>
       </div>
     </div>
+
     <!-- TLS -->
     <div class="proxy-card">
       <span class="proxy-badge badge-tls">🛡️ TLS</span>
       <div class="proxy-info">
-        <div class="proxy-name">fake-https · cloudflare</div>
-        <div class="proxy-secret">ee653cab...6c6f7564666c617265</div>
+        <div class="proxy-desc">TLS-маскировка · трафик как HTTPS cloudflare.com</div>
+        <div class="proxy-secret">ee653cab...636c6f7564666c6172652e636f6d · fake-tls</div>
       </div>
       <div class="proxy-actions">
-        <a href="https://t.me/proxy?server=wwcat.duckdns.org&port=8043&secret=ee653cab966271b2e8b4f698852bbcf86f636c6f7564666c6172652e636f6d" class="btn btn-primary" target="_blank">📱 TG</a>
-        <button class="btn btn-copy" onclick="copyProxyFull('https://t.me/proxy?server=wwcat.duckdns.org&port=8043&secret=ee653cab966271b2e8b4f698852bbcf86f636c6f7564666c6172652e636f6d', this)">📋</button>
+        <a href="https://t.me/proxy?server=wwcat.duckdns.org&port=8043&secret=ee653cab966271b2e8b4f698852bbcf86f636c6f7564666c6172652e636f6d" class="btn btn-primary" target="_blank">📱 Добавить в TG</a>
+        <button class="btn btn-copy" onclick="copyProxy('https://t.me/proxy?server=wwcat.duckdns.org&port=8043&secret=ee653cab966271b2e8b4f698852bbcf86f636c6f7564666c6172652e636f6d', this)">📋</button>
       </div>
     </div>
   </div>
 
-  <!-- ДОНАТ: скрытый номер, прямые ссылки на банки, минимум текста -->
-  <div class="donate-mini">
-    <div class="donate-title">
-      ☕ Поддержать сервер
-    </div>
+  <!-- DONATE: номер скрыт, прямые ссылки на банкинг -->
+  <div class="donate-card">
+    <div class="donate-icon">☕</div>
+    <h3>Поддержать проект</h3>
+    <p>Прокси работает бесплатно. Если он вам помогает — поддержите сервер.</p>
     <div class="donate-buttons">
-      <a href="#" class="bank-link sbp-link" onclick="copyPhoneSBP(event)">💳 СБП (по номеру)</a>
-      <a href="#" class="bank-link bank-sber" onclick="openBank('sber', event)">🏦 Сбер</a>
-      <a href="#" class="bank-link bank-tbank" onclick="openBank('tbank', event)">🟡 Т-Банк</a>
-      <a href="#" class="bank-link bank-alfa" onclick="openBank('alfa', event)">🔴 Альфа</a>
+      <a href="#" class="bank-btn sbp" onclick="copyPhoneSBP(event)">💳 СБП (по номеру)</a>
+      <a href="#" class="bank-btn sber" onclick="openBankApp('sber', event)">🏦 СберБанк</a>
+      <a href="#" class="bank-btn tbank" onclick="openBankApp('tbank', event)">🟡 Т-Банк</a>
+      <a href="#" class="bank-btn alfa" onclick="openBankApp('alfa', event)">🔴 Альфа-Банк</a>
     </div>
-    <div class="hint-text">
+    <div class="note-hidden">
       🔐 Номер телефона скрыт — перевод через приложение банка
     </div>
   </div>
-  <footer>wwcat.duckdns.org · MTProto · без рекламы</footer>
+
+  <footer>
+    wwcat.duckdns.org · MTProxy · <span style="color:var(--muted);">без логов и рекламы</span>
+  </footer>
 </div>
 
-<div class="toast" id="toastMsg"></div>
+<div class="toast" id="toast"></div>
 
 <script>
-// Номер телефона хранится только тут — в DOM не показывается
-const PHONE_RAW = "79529285474";
-const PHONE_DISPLAY = "+79529285474";
+// номер телефона не показывается в DOM, только в скрипте
+const SECRET_PHONE = "+79529285474";
+const RAW_PHONE = "79529285474";
 
 function showToast(msg) {
-  const t = document.getElementById('toastMsg');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 1800);
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2200);
 }
 
-function copyProxyFull(url, btn) {
+function copyProxy(url, btn) {
   navigator.clipboard.writeText(url).then(() => {
-    const original = btn.innerHTML;
+    const originalHTML = btn.innerHTML;
     btn.classList.add('copied');
     btn.innerHTML = '✓';
     showToast('Ссылка скопирована');
     setTimeout(() => {
       btn.classList.remove('copied');
-      btn.innerHTML = original;
-    }, 1500);
-  });
+      btn.innerHTML = originalHTML;
+    }, 1800);
+  }).catch(() => showToast('Не удалось скопировать'));
 }
 
-// Прямые ссылки в банки (схемы)
-function openBank(bank, event) {
+// прямые ссылки в банковские приложения
+function openBankApp(bank, event) {
   event.preventDefault();
-  let deepLink = '';
+  let link = '';
   if (bank === 'sber') {
-    // Сбер: ссылка на оплату по номеру телефона через qr.sberbank.ru (открывает приложение)
-    deepLink = `https://qr.sberbank.ru/phone/${PHONE_RAW}`;
-    window.open(deepLink, '_blank');
+    link = `https://qr.sberbank.ru/phone/${RAW_PHONE}`;
+    window.open(link, '_blank');
     showToast('🟢 Открываем СберБанк для перевода');
   } else if (bank === 'tbank') {
-    deepLink = `tbank://transfer?phone=${PHONE_RAW}`;
-    window.location.href = deepLink;
+    link = `tbank://transfer?phone=${RAW_PHONE}`;
+    window.location.href = link;
     showToast('🟣 Открываем Т-Банк');
-    setTimeout(() => { if(document.hidden === undefined) showToast('Если не открылось, скопируйте номер через СБП'); }, 500);
+    setTimeout(() => {
+      if (!document.hidden) showToast('Если приложение не открылось, используйте СБП');
+    }, 600);
   } else if (bank === 'alfa') {
-    deepLink = `alfabank://pay/phone?phone=${PHONE_RAW}`;
-    window.location.href = deepLink;
+    link = `alfabank://pay/phone?phone=${RAW_PHONE}`;
+    window.location.href = link;
     showToast('🔴 Открываем Альфа-Банк');
   }
 }
@@ -449,10 +563,10 @@ function openBank(bank, event) {
 // СБП: копирование номера без отображения на экране
 function copyPhoneSBP(event) {
   event.preventDefault();
-  navigator.clipboard.writeText(PHONE_DISPLAY).then(() => {
+  navigator.clipboard.writeText(SECRET_PHONE).then(() => {
     showToast('📱 Номер скопирован. Вставьте в приложение банка → СБП');
   }).catch(() => {
-    showToast('Нажмите и удерживайте для копирования, но номер +7 952 928-54-74');
+    showToast('Не удалось скопировать, но номер +7 952 928-54-74');
   });
 }
 </script>
